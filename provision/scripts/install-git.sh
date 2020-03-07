@@ -2,5 +2,5 @@
 set -e
 
 echo "********** Installing GIT **********"
-sudo yum install git -y
+sudo apt install git -y
 git --version

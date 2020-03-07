@@ -1,15 +1,12 @@
 #!/bin/bash
 set -e
 
-cd $HOME
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-rm get-docker.sh
+sudo apt-get install docker.io -y
+sudo usermod -aG docker ${USER}
+docker --version
 
-sudo gpasswd -a $USER docker
-newgrp docker
-sudo service docker restart
+# Install docker compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-sudo systemctl start docker
-sudo systemctl start docker
-sudo systemctl enable docker
+docker-compose --version
