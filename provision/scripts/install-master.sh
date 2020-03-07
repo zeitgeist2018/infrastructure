@@ -1,20 +1,18 @@
 #!/bin/bash
 set -e
 
-export MASTER0_IP=$1
-export ZK_MASTER_NUMBER=$2
+MASTER0_IP=$1
+ZK_MASTER_NUMBER=$2
 
 MESOS_VERSION=1.9.0
 
 cd $HOME
-mkdir mesos
-cd mesos
 
 # Install packages
-sudo add-apt-repository universe
+#sudo add-apt-repository universe
 
 echo "Installing Java"
-sudo add-apt-repository ppa:openjdk-r/ppa -y
+sudo add-apt-repository ppa:openjdk-r/ppa
 sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install openjdk-8-jdk -y
@@ -33,7 +31,10 @@ sudo apt-get install mesosphere -y
 echo "Configuring ZooKeeper"
 echo "zk://$MASTER0_IP:2181/mesos" | sudo tee /etc/mesos/zk
 echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
-echo "server.1=$MASTER0_IP:2888:3888" | sudo tee /etc/zookeeper/conf/zoo.cfg
+sudo cp /etc/zookeeper/conf/zoo.cfg /etc/zookeeper/conf/zoo.cfg.bak
+# dataDir=/var/lib/zookeeper
+sudo chown zookeeper:zookeeper /var/lib/zookeeper
+echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
 
 
 # Configure mesos
