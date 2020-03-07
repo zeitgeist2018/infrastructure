@@ -4,7 +4,7 @@
 master_ip = "192.168.1.100"
 cluster = {
   "mesos.master-0" => { :role => "master", :ip => master_ip, :cpus => 1, :mem => 512 },
-  "mesos.slave-0" => { :role => "slave", :ip => "192.168.1.110", :cpus => 1, :mem => 512 }
+  # "mesos.slave-0" => { :role => "slave", :ip => "192.168.1.110", :cpus => 1, :mem => 512 }
 }
 
 Vagrant.configure("2") do |config|
@@ -19,9 +19,9 @@ Vagrant.configure("2") do |config|
         # Network
         override.vm.hostname = hostname
         vb.name = hostname
-        override.vm.network :public_network, ip: "#{info[:ip]}"
-        config.vm.network "forwarded_port", guest: 5050, host: 5050, auto_correct: true
-        config.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
+        override.vm.network :public_network, bridge: "en1: Wi-Fi (AirPort)", ip: "#{info[:ip]}"
+        # config.vm.network "forwarded_port", guest: 5050, host: 5050, auto_correct: true
+        # config.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
 
         # Data
         #   config.vm.synced_folder "./data", "/opt/data"
