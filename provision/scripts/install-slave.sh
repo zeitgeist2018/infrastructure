@@ -37,13 +37,11 @@ echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
 sudo chown zookeeper:zookeeper /var/lib/zookeeper
 echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
 
-
 # Configure mesos
 echo "Configuring Mesos"
 echo 1 | sudo tee /etc/mesos-master/quorum
 echo $MASTER0_IP | sudo tee /etc/mesos-master/ip
 sudo cp /etc/mesos-master/ip /etc/mesos-master/hostname
-
 
 sudo stop zookeeper || true
 sudo stop mesos-master || true
@@ -56,3 +54,6 @@ sudo cp /etc/mesos-slave/ip /etc/mesos-slave/hostname
 echo "docker,mesos" | sudo tee /etc/mesos-slave/containerizers
 
 sudo start mesos-slave
+
+sudo useradd --no-create-home marathon || echo "Marathon user already exists"
+mkdir -p /var/lib/mesos/slaves || echo "Mesos slaves folder already exists"

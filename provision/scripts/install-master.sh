@@ -53,7 +53,6 @@ MARATHON_ZK=zk://$MASTER0_IP:2181/marathon
 EOF
 sudo mv tmp /etc/default/marathon
 
-
 # Make masters not to run slave service
 sudo stop mesos-slave || echo "Slave service not running, good!"
 echo manual | sudo tee /etc/init/mesos-slave.override
