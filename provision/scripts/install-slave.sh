@@ -6,7 +6,8 @@ SLAVE_IP=$2
 
 echo "************** INSTALLING SLAVE ON $SLAVE_IP ****************"
 
-MESOS_VERSION=1.9.0
+# Obtain version list with `apt-cache policy mesos`
+MESOS_VERSION="1.9.0-2.0.1.ubuntu1404"
 
 cd $HOME
 
@@ -27,7 +28,7 @@ echo "DISTRO=$DISTRO"
 echo "CODENAME=$CODENAME"
 echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/mesosphere.list
 sudo apt-get update -y > /dev/null 2>&1
-sudo apt-get install mesosphere -y > /dev/null 2>&1
+sudo apt-get install mesos=$MESOS_VERSION -y > /dev/null 2>&1
 
 # Configure zookeeper
 echo "Configuring ZooKeeper"

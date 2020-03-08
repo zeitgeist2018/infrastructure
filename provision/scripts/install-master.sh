@@ -10,6 +10,7 @@ echo "************** INSTALLING MASTER ON $MASTER0_IP ****************"
 # Obtain version list with `apt-cache policy mesos`
 MESOS_VERSION="1.9.0-2.0.1.ubuntu1404"
 MARATHON_VERSION="1.7.189-0.1.20190125215327.ubuntu1404"
+CHRONOS_VERSION="2.5.1-0.1.20171211074431.ubuntu1404"
 
 cd $HOME
 
@@ -27,7 +28,7 @@ echo "DISTRO=$DISTRO"
 echo "CODENAME=$CODENAME"
 echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/mesosphere.list
 sudo apt-get update -y > /dev/null 2>&1
-sudo apt-get install mesos=$MESOS_VERSION marathon=$MARATHON_VERSION -y > /dev/null 2>&1
+sudo apt-get install mesos=$MESOS_VERSION marathon=$MARATHON_VERSION chronos=$CHRONOS_VERSION -y > /dev/null 2>&1
 
 # Configure zookeeper
 echo "Configuring ZooKeeper"
