@@ -3,8 +3,8 @@
 
 master_ip = "192.168.1.100"
 cluster = [
-    {:name => "mesos.master-0", :role => "master", :ip => master_ip, :cpus => 1, :mem => 1024},
-    {:name => "mesos.slave-0", :role => "slave", :ip => "192.168.1.110", :cpus => 1, :mem => 1024}
+    {:name => "mesos.master-0", :role => "master", :ip => master_ip, :cpus => 1, :mem => 512},
+    {:name => "mesos.slave-0", :role => "slave", :ip => "192.168.1.110", :cpus => 2, :mem => 2048}
 ]
 
 Vagrant.configure("2") do |config|
