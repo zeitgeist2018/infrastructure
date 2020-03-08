@@ -57,6 +57,7 @@ sudo mv tmp /etc/default/marathon
 # Make masters not to run slave service
 sudo stop mesos-slave || echo "Slave service not running, good!"
 echo manual | sudo tee /etc/init/mesos-slave.override
+sudo update-rc.d marathon enable
 
 # All ready, start services
 sudo apt-get install systemd -y
