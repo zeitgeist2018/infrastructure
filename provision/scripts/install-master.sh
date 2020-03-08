@@ -58,8 +58,11 @@ sudo mv tmp /etc/default/marathon
 sudo stop mesos-slave || echo "Slave service not running, good!"
 echo manual | sudo tee /etc/init/mesos-slave.override
 sudo update-rc.d marathon enable
+sudo update-rc.d chronos defaults
+sudo update-rc.d chronos enable
 
 # All ready, start services
 sudo restart zookeeper
 sudo start mesos-master || sudo restart mesos-master
 sudo service marathon start
+sudo service chronos start
