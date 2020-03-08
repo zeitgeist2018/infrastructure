@@ -1,0 +1,34 @@
+{
+  "id": "gitlab",
+  "cpus": 1,
+  "mem": 512,
+  "disk": 0,
+  "instances": 1,
+  "acceptedResourceRoles": [
+    "*"
+  ],
+  "constraints": [
+    [
+      "hostname",
+      "UNIQUE"
+    ]
+  ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "forcePullImage": true,
+      "image": "docker.io/library/gitlab-ce",
+      "parameters": [],
+      "privileged": true
+    },
+    "volumes": []
+  },
+  "maxLaunchDelaySeconds": 300,
+  "portDefinitions": [
+    {
+      "port": 10000,
+      "name": "default",
+      "protocol": "tcp"
+    }
+  ]
+}

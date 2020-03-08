@@ -3,51 +3,57 @@ set -e
 
 MASTER0_IP=$1
 SLAVE_IP=$2
-MESOS_VERSION=1.9.0
+
+echo "************** INSTALLING SLAVE ON $SLAVE_IP ****************"
+
+# Obtain version list with `apt-cache policy mesos`
+MESOS_VERSION="1.9.0-2.0.1.ubuntu1404"
 
 cd $HOME
-mkdir mesos
-cd mesos
 
 # Install packages
-sudo add-apt-repository universe
+#sudo add-apt-repository universe
 
-sudo add-apt-repository ppa:openjdk-r/ppa
-sudo apt-get update -y
-sudo apt-get upgrade -y
-sudo apt-get install openjdk-8-jdk -y
+echo "Installing Java"
+sudo add-apt-repository ppa:openjdk-r/ppa > /dev/null 2>&1
+sudo apt-get update -y > /dev/null 2>&1
+sudo apt-get upgrade -y > /dev/null 2>&1
+sudo apt-get install openjdk-8-jdk -y > /dev/null 2>&1
 
+echo "Installing Mesosphere"
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
 DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 CODENAME=$(lsb_release -cs)
 echo "DISTRO=$DISTRO"
-echo "CODENAME=CODENAME"
+echo "CODENAME=$CODENAME"
 echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/mesosphere.list
-sudo apt-get update -y
-sudo apt-get install mesosphere -y
+sudo apt-get update -y > /dev/null 2>&1
+sudo apt-get install mesos=$MESOS_VERSION -y > /dev/null 2>&1
 
 # Configure zookeeper
+echo "Configuring ZooKeeper"
+echo "zk://$MASTER0_IP:2181/mesos" | sudo tee /etc/mesos/zk
+echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
+sudo chown zookeeper:zookeeper /var/lib/zookeeper
+echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
 
-cat <<EOF > sudo /etc/mesos/zk
-zk://$MASTER0_IP:2181/mesos
-EOF
+# Configure mesos
+echo "Configuring Mesos"
+echo 1 | sudo tee /etc/mesos-master/quorum
+echo $MASTER0_IP | sudo tee /etc/mesos-master/ip
+sudo cp /etc/mesos-master/ip /etc/mesos-master/hostname
 
-cat <<EOF > sudo /etc/zookeeper/conf/myid
-$ZK_MASTER_NUMBER
-EOF
-
-cat <<EOF > sudo /etc/zookeeper/conf/zoo.cfg
-server.1=$MASTER0_IP:2888:3888
-EOF
-
-
-sudo stop zookeeper
-sudo stop mesos-master
+sudo stop zookeeper || true
+sudo stop mesos-master || true
 echo manual | sudo tee /etc/init/zookeeper.override
 echo manual | sudo tee /etc/init/mesos-master.override
 
 
 echo $SLAVE_IP | sudo tee /etc/mesos-slave/ip
 sudo cp /etc/mesos-slave/ip /etc/mesos-slave/hostname
+echo "docker,mesos" | sudo tee /etc/mesos-slave/containerizers
 
 sudo start mesos-slave
+
+sudo useradd --no-create-home marathon || echo "Marathon user already exists"
+mkdir -p /var/lib/mesos/slaves || echo "Mesos slaves folder already exists"
