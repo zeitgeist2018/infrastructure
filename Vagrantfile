@@ -28,7 +28,9 @@ Vagrant.configure("2") do |config|
 
         # Data
         #   config.vm.synced_folder "./data", "/opt/data"
-        #   config.vm.synced_folder "./data/logs/zookeeper", "/var/logs/zookeeper"
+        #   config.vm.synced_folder "./data/logs/zookeeper", "/var/log/zookeeper"
+        #   config.vm.synced_folder "./data/logs/mesos", "/var/log/mesos"
+          # config.vm.synced_folder "./data/logs/marathon", "/var/log/marathon"
         #   config.vm.provision "file", source: "", destination: ".gitconfig"
 
         # Common dependencies

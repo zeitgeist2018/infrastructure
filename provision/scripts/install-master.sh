@@ -7,12 +7,11 @@ ZK_MASTER_NUMBER=$2
 
 echo "************** INSTALLING MASTER ON $MASTER0_IP ****************"
 
-MESOS_VERSION=1.9.0
+# Obtain version list with `apt-cache policy mesos`
+MESOS_VERSION="1.9.0-2.0.1.ubuntu1404"
+MARATHON_VERSION="1.7.189-0.1.20190125215327.ubuntu1404"
 
 cd $HOME
-
-# Install packages
-#sudo add-apt-repository universe
 
 echo "Installing Java"
 sudo add-apt-repository ppa:openjdk-r/ppa > /dev/null 2>&1
@@ -28,7 +27,7 @@ echo "DISTRO=$DISTRO"
 echo "CODENAME=$CODENAME"
 echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/mesosphere.list
 sudo apt-get update -y > /dev/null 2>&1
-sudo apt-get install mesosphere -y > /dev/null 2>&1
+sudo apt-get install mesos=$MESOS_VERSION marathon=$MARATHON_VERSION -y > /dev/null 2>&1
 
 # Configure zookeeper
 echo "Configuring ZooKeeper"
@@ -58,8 +57,6 @@ sudo mv tmp /etc/default/marathon
 sudo stop mesos-slave || echo "Slave service not running, good!"
 echo manual | sudo tee /etc/init/mesos-slave.override
 sudo update-rc.d marathon enable
-sudo update-rc.d chronos defaults
-sudo update-rc.d chronos enable
 
 # All ready, start services
 sudo restart zookeeper
