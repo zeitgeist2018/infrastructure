@@ -52,5 +52,6 @@ echo manual | sudo tee /etc/init/mesos-master.override
 
 echo $SLAVE_IP | sudo tee /etc/mesos-slave/ip
 sudo cp /etc/mesos-slave/ip /etc/mesos-slave/hostname
+echo "docker,mesos" | sudo tee /etc/mesos-slave/containerizers
 
 sudo start mesos-slave
