@@ -1,45 +1,50 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-master_ip = "192.168.1.100"
-cluster = {
-  "mesos.master-0" => { :role => "master", :ip => master_ip, :cpus => 1, :mem => 512 },
-  "mesos.slave-0" => { :role => "slave", :ip => "192.168.1.110", :cpus => 1, :mem => 512 }
-}
+require 'json'
+
+config_file = File.read('cluster-config.json')
+nodes = JSON.parse(config_file)["nodes"]
+config_file_target = "/home/vagrant/cluster-config.json"
 
 Vagrant.configure("2") do |config|
-  cluster.each_with_index do |(hostname, info), index|
-    config.vm.define hostname do |cfg|
-      cfg.vm.provider :virtualbox do |vb, override|
 
-        # Basics
-        config.vm.box = "ubuntu/trusty64"
-        vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+  nodes.each_with_index do |node, index|
+    config.vm.define node["name"] do |machine|
 
-        # Network
-        override.vm.hostname = hostname
-        vb.name = hostname
-        override.vm.network :public_network, ip: "#{info[:ip]}"
-        config.vm.network "forwarded_port", guest: 5050, host: 5050, auto_correct: true
-        config.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
+      machine.vm.provision "shell", privileged: false, inline: <<-EOF
+          echo "************* GENERATING MACHINE #{node} ***************"
+      EOF
 
-        # Data
-        #   config.vm.synced_folder "./data", "/opt/data"
-        #   config.vm.provision "file", source: "", destination: ".gitconfig"
+      machine.vm.hostname = node["name"]
+      machine.vm.provider :virtualbox do |v, override|
+        machine.vm.box = "ubuntu/trusty64"
+        v.customize ["modifyvm", :id, "--memory", node["mem"]]
+        v.customize ["modifyvm", :id, "--cpus", node["cpus"]]
+        override.vm.hostname = node["name"]
+        v.name = node["name"]
+        override.vm.network :public_network, bridge: "en1: Wi-Fi (AirPort)", ip: "#{node["ip"]}"
+      end
 
-        # Provision dependencies
-        config.vm.provision "shell", path: "./provision/scripts/init.sh"
-        # config.vm.provision "shell", path: "./provision/scripts/install-git.sh"
-        config.vm.provision "shell", path: "./provision/scripts/install-docker.sh"
+      # Data
+      # config.vm.synced_folder "./data", "/opt/data"
+      # config.vm.synced_folder "./data/logs/zookeeper", "/var/log/zookeeper"
+      # config.vm.synced_folder "./data/logs/mesos", "/var/log/mesos"
+      # config.vm.synced_folder "./data/logs/marathon", "/var/log/marathon"
+      config.vm.provision "file", source: "./cluster-config.json", destination: config_file_target
 
-        # Provision infrastructure
-        if info[:role] == "master"
-            config.vm.provision "shell", :path => "./provision/scripts/install-master.sh", :args => [info[:ip], index+1]
-        else info[:role] == "slave"
-            config.vm.provision "shell", :path => "./provision/scripts/install-slave.sh", :args => [master_ip, info[:ip]]
-        end
+      # Common dependencies
+      machine.vm.provision "shell", path: "./provision/scripts/init.sh"
+      # config.vm.provision "shell", path: "./provision/scripts/install-git.sh"
+      machine.vm.provision "shell", path: "./provision/scripts/install-docker.sh"
 
-      end # end provider
-    end # end config
-   end # end cluster
+      # Provision
+      if node["role"] == "master"
+        machine.vm.provision "shell", :path => "./provision/scripts/install-master.sh", :args => [config_file_target]
+      elsif node["role"] == "slave"
+        machine.vm.provision "shell", :path => "./provision/scripts/install-slave.sh", :args => [config_file_target]
+      end
+    end
+  end
+
 end
