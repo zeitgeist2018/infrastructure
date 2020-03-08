@@ -33,8 +33,6 @@ sudo apt-get install mesosphere -y > /dev/null 2>&1
 echo "Configuring ZooKeeper"
 echo "zk://$MASTER0_IP:2181/mesos" | sudo tee /etc/mesos/zk
 echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
-#sudo cp /etc/zookeeper/conf/zoo.cfg /etc/zookeeper/conf/zoo.cfg.bak
-# dataDir=/var/lib/zookeeper
 sudo chown zookeeper:zookeeper /var/lib/zookeeper
 echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
 

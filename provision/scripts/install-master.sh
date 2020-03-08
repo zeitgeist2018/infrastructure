@@ -34,8 +34,6 @@ sudo apt-get install mesosphere -y > /dev/null 2>&1
 echo "Configuring ZooKeeper"
 echo "zk://$MASTER0_IP:2181/mesos" | sudo tee /etc/mesos/zk
 echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
-#sudo cp /etc/zookeeper/conf/zoo.cfg /etc/zookeeper/conf/zoo.cfg.bak
-# dataDir=/var/lib/zookeeper
 sudo chown zookeeper:zookeeper /var/lib/zookeeper
 echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
 
@@ -65,14 +63,3 @@ sudo apt-get install systemd -y
 sudo restart zookeeper
 sudo start mesos-master || sudo restart mesos-master
 sudo service marathon start
-
-
-#MARATHON_VERSION=1.8.222
-#echo "Start Marathon"
-#cd $HOME
-#mkdir marathon
-#curl -O https://downloads.mesosphere.io/marathon/builds/1.8.222-86475ddac/marathon-1.8.222-86475ddac.tgz
-#tar xzf marathon-1.8.222-86475ddac.tgz --strip-components 1 -C marathon
-#cd marathon/bin
-#sudo mkdir -p /var/log/marathon
-#(./marathon --master $(cat /etc/mesos/zk) --zk $(cat /etc/marathon/conf/zk) &)
