@@ -60,7 +60,6 @@ echo manual | sudo tee /etc/init/mesos-slave.override
 sudo update-rc.d marathon enable
 
 # All ready, start services
-sudo apt-get install systemd -y
 sudo restart zookeeper
 sudo start mesos-master || sudo restart mesos-master
 sudo service marathon start
