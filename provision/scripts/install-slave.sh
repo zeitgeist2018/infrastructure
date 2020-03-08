@@ -1,10 +1,17 @@
 #!/bin/bash
 set -e
 
-MASTER0_IP=$1
-SLAVE_IP=$2
+sudo apt-get install -y jq > /dev/null 2>&1
 
-echo "************** INSTALLING SLAVE ON $SLAVE_IP ****************"
+CFG_FILE=$1
+IP_ADDRESS=$(hostname -I | awk '{print $2}')
+CFG_MASTER_IPS=$(cat $CFG_FILE | jq -r -c '.nodes | .[] | select(.role == "master").ip' | paste -sd, -)
+CFG_MASTER_IPS_WITH_PORTS=$(cat $CFG_FILE | jq -r -c '.nodes | .[] | select(.role == "master").ip + ":2181"' | paste -sd, -)
+#ZK_MASTER_ID=$(cat $CFG_FILE | jq -r --arg IP_ADDRESS "$IP_ADDRESS" -c '.nodes | .[] | select(.ip == $IP_ADDRESS).zookeeperNodeId')
+ZK_SERVER_DESCRIPTORS=$(cat $CFG_FILE | jq -c '.nodes | .[] | select(.role == "master") | "server." + (.zookeeperNodeId|tostring) + "=" + .ip + ":2888:3888"')
+ZK_QUORUM=1 # TODO: Calculate quorum automatically
+
+echo "************** INSTALLING SLAVE ON $IP_ADDRESS ****************"
 
 # Obtain version list with `apt-cache policy mesos`
 MESOS_VERSION="1.9.0-2.0.1.ubuntu1404"
@@ -32,16 +39,8 @@ sudo apt-get install mesos=$MESOS_VERSION -y > /dev/null 2>&1
 
 # Configure zookeeper
 echo "Configuring ZooKeeper"
-echo "zk://$MASTER0_IP:2181/mesos" | sudo tee /etc/mesos/zk
-echo $ZK_MASTER_NUMBER | sudo tee sudo /etc/zookeeper/conf/myid
+echo "zk://$CFG_MASTER_IPS_WITH_PORTS/mesos" | sudo tee /etc/mesos/zk
 sudo chown zookeeper:zookeeper /var/lib/zookeeper
-echo "server.1=$MASTER0_IP:2888:3888" | sudo tee -a /etc/zookeeper/conf/zoo.cfg
-
-# Configure mesos
-echo "Configuring Mesos"
-echo 1 | sudo tee /etc/mesos-master/quorum
-echo $MASTER0_IP | sudo tee /etc/mesos-master/ip
-sudo cp /etc/mesos-master/ip /etc/mesos-master/hostname
 
 sudo stop zookeeper || true
 sudo stop mesos-master || true
@@ -49,7 +48,7 @@ echo manual | sudo tee /etc/init/zookeeper.override
 echo manual | sudo tee /etc/init/mesos-master.override
 
 
-echo $SLAVE_IP | sudo tee /etc/mesos-slave/ip
+echo $IP_ADDRESS | sudo tee /etc/mesos-slave/ip
 sudo cp /etc/mesos-slave/ip /etc/mesos-slave/hostname
 echo "docker,mesos" | sudo tee /etc/mesos-slave/containerizers
 
