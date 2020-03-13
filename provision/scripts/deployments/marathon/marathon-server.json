@@ -1,26 +1,29 @@
 {
-  "id": "test-nginx",
+  "id": "hostname",
   "cpus": 0.1,
-  "mem": 64.0,
+  "mem": 64,
   "instances": 2,
   "container": {
     "type": "DOCKER",
     "docker": {
-      "image": "nginx",
-      "network": "BRIDGE",
-      "portMappings": [
-        { "containerPort": 80, "hostPort": 0, "protocol": "tcp" }
-      ]
-    }
+      "forcePullImage": false,
+      "image": "tutum/hello-world",
+      "parameters": [],
+      "privileged": false
+    },
+    "volumes": [],
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 0,
+        "labels": {},
+        "protocol": "tcp"
+      }
+    ]
   },
-  "healthChecks": [
+  "networks": [
     {
-      "protocol": "HTTP",
-      "portIndex": 0,
-      "path": "/",
-      "gracePeriodSeconds": 5,
-      "intervalSeconds": 20,
-      "maxConsecutiveFailures": 3
+      "mode": "container/bridge"
     }
   ]
 }
