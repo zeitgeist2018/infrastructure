@@ -10,6 +10,7 @@ CFG_MASTER_IPS_WITH_PORTS=$(cat $CFG_FILE | jq -r -c '.nodes | .[] | select(.rol
 ZK_MASTER_ID=$(cat $CFG_FILE | jq -r --arg IP_ADDRESS "$IP_ADDRESS" -c '.nodes | .[] | select(.ip == $IP_ADDRESS).zookeeperNodeId')
 ZK_SERVER_DESCRIPTORS=$(cat $CFG_FILE | jq -c '.nodes | .[] | select(.role == "master") | "server." + (.zookeeperNodeId|tostring) + "=" + .ip + ":2888:3888"')
 ZK_QUORUM=1 # TODO: Calculate quorum automatically
+#MESOS_DNS_SERVER # TODO: Get DNS server ip from config file
 
 echo "CFG_MASTER_IPS=$CFG_MASTER_IPS"
 echo "CFG_MASTER_IPS_WITH_PORTS=$CFG_MASTER_IPS_WITH_PORTS"

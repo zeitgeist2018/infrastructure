@@ -5,11 +5,10 @@ sudo apt-get install -y jq > /dev/null 2>&1
 
 CFG_FILE=$1
 IP_ADDRESS=$(hostname -I | awk '{print $2}')
-CFG_MASTER_IPS=$(cat $CFG_FILE | jq -r -c '.nodes | .[] | select(.role == "master").ip' | paste -sd, -)
 CFG_MASTER_IPS_WITH_PORTS=$(cat $CFG_FILE | jq -r -c '.nodes | .[] | select(.role == "master").ip + ":2181"' | paste -sd, -)
-#ZK_MASTER_ID=$(cat $CFG_FILE | jq -r --arg IP_ADDRESS "$IP_ADDRESS" -c '.nodes | .[] | select(.ip == $IP_ADDRESS).zookeeperNodeId')
-ZK_SERVER_DESCRIPTORS=$(cat $CFG_FILE | jq -c '.nodes | .[] | select(.role == "master") | "server." + (.zookeeperNodeId|tostring) + "=" + .ip + ":2888:3888"')
-ZK_QUORUM=1 # TODO: Calculate quorum automatically
+INSTALL_MESOS_DNS=$(cat $CFG_FILE | jq -r --arg IP_ADDRESS "$IP_ADDRESS" -c '.nodes | .[] | select(.ip == $IP_ADDRESS).mesosDns')
+
+echo "INSTALL_MESOS_DNS=$INSTALL_MESOS_DNS"
 
 echo "************** INSTALLING SLAVE ON $IP_ADDRESS ****************"
 
@@ -56,3 +55,28 @@ sudo start mesos-slave
 
 sudo useradd --no-create-home marathon || echo "Marathon user already exists"
 mkdir -p /var/lib/mesos/slaves || echo "Mesos slaves folder already exists"
+
+
+# Install mesos-dns
+#if [ "$INSTALL_MESOS_DNS" = true ] ; then
+#  MESOS_DNS_VERSION=v0.7.0-rc2
+#  sudo mkdir -p /home/marathon/mesos-dns
+#  sudo chown -R marathon:marathon /home/marathon
+#  cd /home/marathon/mesos-dns
+#  sudo wget -O mesos-dns https://github.com/mesosphere/mesos-dns/releases/download/$MESOS_DNS_VERSION/mesos-dns-$MESOS_DNS_VERSION-linux-amd64
+#cat <<EOF > $HOME/tmp
+#{
+#  "zk": "zk://$CFG_MASTER_IPS_WITH_PORTS/mesos",
+#  "refreshSeconds": 60,
+#  "ttl": 60,
+#  "domain": "mesos",
+#  "port": 53,
+#  "resolvers": ["$IP_ADDRESS"],
+#  "timeout": 5,
+#  "email": "root.mesos-dns.mesos"
+#}
+#EOF
+#  sudo mv $HOME/tmp config.json
+#  cat config.json
+#  sudo sed -i '1s/^/nameserver 192.168.1.110\n /' /etc/resolv.conf # TODO: Add dns server automatically
+#fi
