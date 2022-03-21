@@ -1,7 +1,0 @@
-{
-  "id": "shell",
-  "cmd": "while [ true ] ; do echo 'Hello Marathon' ; sleep 1 ; done",
-  "cpus": 0.1,
-  "mem": 10.0,
-  "instances": 1
-}
