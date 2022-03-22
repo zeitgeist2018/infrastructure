@@ -1,20 +1,20 @@
-variable "env" {
+variable env {
   type = string
 }
 
-variable "account_name" {
+variable account_name {
   type = string
 }
 
-variable "account_budget_limit" {
+variable account_budget_limit {
   type = string
 }
 
-variable "threshold_percentage" {
+variable threshold_percentage {
   type = number
 }
 
-variable "services" {
+variable services {
   description = "List of AWS services to be monitored in terms of costs"
 
   type = map(object({
