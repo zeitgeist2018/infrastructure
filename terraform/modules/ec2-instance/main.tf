@@ -46,6 +46,8 @@ resource aws_instance instance {
   associate_public_ip_address = var.associate_public_ip_address
   key_name = aws_key_pair.instance_key_pair.key_name
 
+  user_data = base64encode(var.cloud_init_file.rendered)
+
   root_block_device {
     delete_on_termination = true
     encrypted = true

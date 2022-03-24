@@ -26,7 +26,6 @@ variable vpc_id {
   type = string
 }
 
-
 variable instance_name_suffix {
   type = string
 }
@@ -46,4 +45,8 @@ variable disk {
 
 variable associate_public_ip_address {
   type = bool
+}
+
+variable cloud_init_file {
+  type = string
 }

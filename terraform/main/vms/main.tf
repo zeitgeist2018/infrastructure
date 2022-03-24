@@ -36,6 +36,8 @@ module nodes {
   count  = 1
   source = "../../modules/ec2-instance"
 
+  account                     = var.account
+  tags                        = var.tags
   vpc_id                      = var.vpc_id
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t4g.nano"  // 2xCPU/512Mb/$6/month each
@@ -46,6 +48,5 @@ module nodes {
   private_ip                  = "10.0.1.2${count.index}"
   elastic_ip                  = true
   associate_public_ip_address = true
-  account                     = var.account
-  tags                        = var.tags
+  cloud_init_file = file("${path.root}/../provisioning/cloud-config.yml")
 }

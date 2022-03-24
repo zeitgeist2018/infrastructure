@@ -1,0 +1,44 @@
+#cloud-config
+
+cloud_init_modules:
+  - seed_random
+  - bootcmd
+  - [write-files, always]
+  - growpart
+  - resizefs
+  - set_hostname
+  - update_hostname
+  - update_etc_hosts
+  - users-groups
+  - ssh
+
+cloud_config_modules:
+  - [timezone, always]
+  - [package-update-upgrade-install, always]
+  - [runcmd, always]
+
+cloud_final_modules:
+  - [scripts-user, always]
+
+write_files:
+  - path: /root/.aws/config
+    permissions: 0644
+    content: |
+      [default]
+      region=us-east-1
+
+timezone: Europe/London
+
+packages:
+  - curl
+  - jq
+  - python-pip
+  - git
+
+runcmd:
+  - mkdir -p /root/provision/
+  - pip install awscli ansible==4.9.0
+  - aws --region us-central-1 ec2 describe-tags --filter Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id) > /root/provision/instance.json
+  - git clone https://github.com/zeitgeist2018/infrastructure.git && mv infrastructure/ansible /root/provision && rm -r infrastructure
+  - chmod +x /root/provision/provision.sh
+  - sh -c /root/provision/provision.sh
