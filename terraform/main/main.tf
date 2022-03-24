@@ -18,13 +18,13 @@ locals {
   }
 }
 
-#module network {
-#  source = "./network"
-#
-#  cluster = local.cluster
-#  az = local.az
-#}
-#
+module network {
+  source = "./network"
+
+  account = var.account
+  az = local.az
+}
+
 #module vms {
 #  source = "./vms"
 #
