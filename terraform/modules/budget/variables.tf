@@ -1,9 +1,5 @@
-variable env {
-  type = string
-}
-
-variable account_name {
-  type = string
+variable account {
+  type = map(string)
 }
 
 variable account_budget_limit {

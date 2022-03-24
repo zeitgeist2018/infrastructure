@@ -1,9 +1,9 @@
-variable env {
-  type = string
+variable account {
+  type = map(string)
 }
 
-variable region {
-  type = string
+variable tags {
+  type = map(string)
 }
 
 variable subnet_id {
@@ -26,13 +26,6 @@ variable vpc_id {
   type = string
 }
 
-variable cluster {
-  type = string
-}
-
-variable application {
-  type = string
-}
 
 variable instance_name_suffix {
   type = string
@@ -53,12 +46,4 @@ variable disk {
 
 variable associate_public_ip_address {
   type = bool
-}
-
-locals{
-  tags = {
-    Cluster = var.cluster
-    Environment = var.env
-    Application = var.application
-  }
 }

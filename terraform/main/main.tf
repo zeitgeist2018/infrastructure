@@ -1,20 +1,6 @@
 locals {
-  cluster = var.account.env
-  region = var.account.region
-  az = var.account.az
-
-  budget_limit = var.budget.limit
-  budget_threshold_percentage = 50
-  budget_services = {
-    EC2 = {
-      budget_limit = "16.0"
-    },
-    ECR = {
-      budget_limit = "2.0"
-    },
-    S3 = {
-      budget_limit = "2.0"
-    }
+  common_tags = {
+    ENV = var.account.env
   }
 }
 
@@ -22,25 +8,25 @@ module network {
   source = "./network"
 
   account = var.account
-  az = local.az
+  tags    = local.common_tags
+  az      = var.account.az
 }
 
 #module vms {
 #  source = "./vms"
 #
-#  cluster = local.cluster
-#  region = local.region
-#  env = local.cluster
-#  vpc_id = module.network.vpc_id
+#  account   = var.account
+#  tags      = local.common_tags
+#  vpc_id    = module.network.vpc_id
 #  subnet_id = module.network.subnet_ids.private_0
 #}
 
 module budgets {
   source = "./budgets"
 
-  env = local.cluster
-  account_name = local.cluster
-  budget_limit = local.budget_limit
-  budget_threshold_percentage = local.budget_threshold_percentage
-  budget_services = local.budget_services
+  account                     = var.account
+  tags                        = local.common_tags
+  budget_limit                = var.budget.limit
+  budget_threshold_percentage = var.budget.threshold_percentage
+  budget_services             = var.budget_services
 }

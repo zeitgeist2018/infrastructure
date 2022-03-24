@@ -7,28 +7,25 @@ resource aws_vpc vpc {
   cidr_block = local.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support = true
-  tags = {
+  tags = merge({
     Name = "${var.account.env}-vpc"
-    ENV = var.account.env
-  }
+  }, var.tags)
 }
 
 resource aws_internet_gateway gateway {
   vpc_id = aws_vpc.vpc.id
-  tags = {
+  tags = merge({
     Name = "${var.account.env}-igw"
-    ENV = var.account.env
-  }
+  }, var.tags)
 }
 
 resource aws_subnet private_0 {
   vpc_id = aws_vpc.vpc.id
   cidr_block = local.private_cidr
   availability_zone = var.az
-  tags = {
+  tags = merge({
     Name = "${var.account.env}-private-subnet-0"
-    ENV = var.account.env
-  }
+  }, var.tags)
 }
 
 resource aws_route_table private_0 {
@@ -37,10 +34,9 @@ resource aws_route_table private_0 {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gateway.id
   }
-  tags = {
+  tags = merge({
     Name = "${var.account.env}-route-table"
-    ENV = var.account.env
-  }
+  }, var.tags)
 }
 
 resource aws_route_table_association public-1 {

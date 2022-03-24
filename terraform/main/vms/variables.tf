@@ -1,13 +1,5 @@
-variable env {
-  type = string
-}
-
-variable cluster {
-  type = string
-}
-
-variable region {
-  type = string
+variable account {
+  type = map(string)
 }
 
 variable vpc_id {
@@ -18,8 +10,6 @@ variable subnet_id {
   type = string
 }
 
-locals {
-  tags = {
-    "Cluster" = var.cluster
-  }
+variable tags {
+  type = map(string)
 }

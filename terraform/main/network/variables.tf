@@ -5,3 +5,7 @@ variable account {
 variable az {
   type = string
 }
+
+variable tags {
+  type = map(string)
+}

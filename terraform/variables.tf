@@ -5,3 +5,8 @@ variable account {
 variable budget {
   type = map(string)
 }
+variable budget_services {
+  type = map(object({
+    budget_limit = string
+  }))
+}

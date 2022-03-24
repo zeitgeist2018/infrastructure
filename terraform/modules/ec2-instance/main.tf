@@ -1,20 +1,22 @@
 locals {
   output_folder = "output"
+  instance_name = "${var.account.env}-${var.instance_name_suffix}"
 }
 
 resource local_file private_key_file {
   content = tls_private_key.private_key.private_key_pem
-  filename = "${local.output_folder}/${var.cluster}-${var.application}-${var.instance_name_suffix}-private-key.pem"
-}
-
-resource local_file instance_public_dns_file {
-  content = aws_instance.instance.public_dns
-  filename = "${local.output_folder}/${var.cluster}-${var.application}-${var.instance_name_suffix}-public-dns.txt"
+  filename = "${local.output_folder}/${local.instance_name}-private-key.pem"
 }
 
 resource local_file instance_public_ip_file {
-  content = aws_instance.instance.public_ip
-  filename = "${local.output_folder}/${var.cluster}-${var.application}-${var.instance_name_suffix}-public-ip.txt"
+  content = <<EOF
+    {
+      "public_ip": \"${aws_instance.instance.public_ip}\",
+      "private_ip": \"${aws_instance.instance.private_ip}\",
+      "public_dns": \"${aws_instance.instance.public_dns}\"
+    }
+EOF
+  filename = "${local.output_folder}/${local.instance_name}-public-ip.txt"
 }
 
 resource tls_private_key private_key {
@@ -23,7 +25,7 @@ resource tls_private_key private_key {
 }
 
 resource aws_key_pair instance_key_pair {
-  key_name = "${var.cluster}-${var.application}-${var.instance_name_suffix}-key"
+  key_name = "${local.instance_name}-key"
   public_key = tls_private_key.private_key.public_key_openssh
 }
 
@@ -52,17 +54,11 @@ resource aws_instance instance {
     iops = 3000
   }
 
-  tags = merge(
-    local.tags,
-    {
-      "Name" = "${var.cluster}-${var.application}-${var.instance_name_suffix}"
-    }
-  )
+  tags = merge({
+    "Name" = local.instance_name
+  }, var.tags)
 
-  volume_tags = merge(
-    local.tags,
-    {
-      "Name" = "${var.cluster}-${var.application}-${var.instance_name_suffix}"
-    }
-  )
+  volume_tags = merge({
+      "Name" = local.instance_name
+    }, var.tags)
 }
