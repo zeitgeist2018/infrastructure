@@ -6,17 +6,18 @@ locals {
 resource local_file private_key_file {
   content = tls_private_key.private_key.private_key_pem
   filename = "${local.output_folder}/${local.instance_name}-private-key.pem"
+  file_permission = "600"
 }
 
 resource local_file instance_public_ip_file {
   content = <<EOF
     {
-      "public_ip": \"${aws_instance.instance.public_ip}\",
-      "private_ip": \"${aws_instance.instance.private_ip}\",
-      "public_dns": \"${aws_instance.instance.public_dns}\"
+      "public_ip": "${aws_instance.instance.public_ip}",
+      "private_ip": "${aws_instance.instance.private_ip}",
+      "public_dns": "${aws_instance.instance.public_dns}"
     }
 EOF
-  filename = "${local.output_folder}/${local.instance_name}-public-ip.txt"
+  filename = "${local.output_folder}/${local.instance_name}-config.txt"
 }
 
 resource tls_private_key private_key {
