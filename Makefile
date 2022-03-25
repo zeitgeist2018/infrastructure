@@ -5,6 +5,10 @@ STATE_PATH?=state/terraform.tfstate
 STATE_BUCKET?=terraform---state
 STATE_PARAMS=-backend-config='bucket=$(STATE_BUCKET)' -backend-config='key=$(STATE_PATH)'
 
+NODE?=0
+NODE_IP := $(shell cat "./terraform/output/${ENV}-${NODE}-public-ip.txt" | jq -r '.public_ip')
+NODE_KEY := "./terraform/output/${ENV}-${NODE}-private-key.pem"
+
 init: clean
 	cd terraform && \
 	tfenv install && \
@@ -27,3 +31,6 @@ destroy:
 clean:
 	@rm -fR terraform.*
 	@rm -fR .terraform/modules
+
+ssh-node:
+	@ssh -i ${NODE_KEY} -o StrictHostKeychecking=no -o IdentitiesOnly=yes "ec2-user@${NODE_IP}"
