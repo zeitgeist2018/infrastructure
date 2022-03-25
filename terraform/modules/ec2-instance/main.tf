@@ -17,7 +17,7 @@ resource local_file instance_public_ip_file {
       "public_dns": "${aws_instance.instance.public_dns}"
     }
 EOF
-  filename = "${local.output_folder}/${local.instance_name}-config.txt"
+  filename = "${local.output_folder}/${local.instance_name}-config.json"
 }
 
 resource tls_private_key private_key {

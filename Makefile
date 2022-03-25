@@ -6,7 +6,7 @@ STATE_BUCKET?=terraform---state
 STATE_PARAMS=-backend-config='bucket=$(STATE_BUCKET)' -backend-config='key=$(STATE_PATH)'
 
 NODE?=0
-NODE_IP := $(shell cat "./terraform/output/${ENV}-${NODE}-public-ip.txt" | jq -r '.public_ip')
+NODE_IP := $(shell cat "./terraform/output/${ENV}-${NODE}-config.json" | jq -r '.public_ip')
 NODE_KEY := "./terraform/output/${ENV}-${NODE}-private-key.pem"
 
 init: clean
