@@ -36,6 +36,11 @@ resource aws_eip elastic_ip {
   associate_with_private_ip = var.private_ip
 }
 
+data template_file cloud_init {
+  template = var.cloud_init_file
+  vars = var.cloud_init_vars
+}
+
 resource aws_instance instance {
   ami = var.ami
   instance_type = var.instance_type
@@ -46,7 +51,7 @@ resource aws_instance instance {
   associate_public_ip_address = var.associate_public_ip_address
   key_name = aws_key_pair.instance_key_pair.key_name
 
-  user_data = base64encode(var.cloud_init_file.rendered)
+  user_data = base64encode(data.template_file.cloud_init.rendered)
 
   root_block_device {
     delete_on_termination = true
@@ -57,7 +62,7 @@ resource aws_instance instance {
   }
 
   tags = merge({
-    "Name" = local.instance_name
+    Name = local.instance_name
   }, var.tags)
 
   volume_tags = merge({

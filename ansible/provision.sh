@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SLACK_WEBHOOK_URL=$1
+
 function sendNotifications() {
   sendSlackNotification "$@" || true
   sendOpsgenieNotification "$@" || true
@@ -27,7 +29,7 @@ function slackMessage() {
     }
 EOF
 
-    curl -X POST -H 'Content-type: application/json' https://hooks.slack.com/services/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 --data "${JSON}"
+    curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
 }
 INSTANCE_FILE=/root/provision/instance.json
 env=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')

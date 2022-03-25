@@ -10,3 +10,7 @@ variable budget_services {
     budget_limit = string
   }))
 }
+
+variable slack_webhook_url {
+  type = string
+}

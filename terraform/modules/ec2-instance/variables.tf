@@ -50,3 +50,6 @@ variable associate_public_ip_address {
 variable cloud_init_file {
   type = string
 }
+
+variable cloud_init_vars {
+}
