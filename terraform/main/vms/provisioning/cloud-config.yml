@@ -30,6 +30,7 @@ write_files:
     append: true
     content: |
       SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      ENV=${ENV}
 
 timezone: Europe/London
 

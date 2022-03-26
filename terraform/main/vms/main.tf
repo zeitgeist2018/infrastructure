@@ -39,5 +39,6 @@ module nodes {
   cloud_init_file = file("${path.module}/provisioning/cloud-config.yml")
   cloud_init_vars = {
     SLACK_WEBHOOK_URL = var.slack_webhook_url
+    ENV = var.account.env
   }
 }
