@@ -63,7 +63,8 @@ resource aws_budgets_budget budget_resources {
   time_period_start = "2022-03-01_00:00"
 
   cost_filters = {
-    Service = lookup(local.aws_services, each.key)
+    name = "Service"
+    values = lookup(local.aws_services, each.key)
   }
 
 #  notification {
