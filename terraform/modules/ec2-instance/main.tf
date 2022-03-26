@@ -1,12 +1,15 @@
 locals {
   instance_name = "${var.account.env}-${var.instance_name_suffix}"
+  output = {
+    private_key = "./output/${local.instance_name}-private-key.pem"
+    config = "./output/${local.instance_name}-config.json"
+  }
 }
 
 resource local_file private_key {
   content = tls_private_key.private_key.private_key_pem
-  filename = "./output/${local.instance_name}-private-key.pem"
+  filename = local.output.private_key
   file_permission = "600"
-  depends_on = [aws_instance.instance]
 }
 
 resource local_file config {
@@ -17,7 +20,7 @@ resource local_file config {
       "public_dns": "${aws_instance.instance.public_dns}"
     }
 EOF
-  filename = "./output/${local.instance_name}-config.json"
+  filename = local.output.config
   depends_on = [aws_instance.instance]
 }
 
@@ -58,13 +61,13 @@ resource aws_instance instance {
   user_data = base64encode(data.template_file.cloud_init.rendered)
 
   provisioner file {
-    source      = "${path.module}/../../../ansible"
+    source      = "${path.root}/../ansible"
     destination = "/home/ec2-user/ansible"
 
     connection {
       type        = "ssh"
       user        = "ec2-user"
-      private_key = file("${path.module}/../../output/${local.instance_name}-private-key.pem")
+      private_key = file(local.output.private_key)
       host        = self.public_dns
     }
   }
