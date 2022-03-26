@@ -1,12 +1,12 @@
 locals {
-  output_folder = "output"
   instance_name = "${var.account.env}-${var.instance_name_suffix}"
 }
 
 resource local_file private_key {
   content = tls_private_key.private_key.private_key_pem
-  filename = "${local.output_folder}/${local.instance_name}-private-key.pem"
+  filename = "./output/${local.instance_name}-private-key.pem"
   file_permission = "600"
+  depends_on = [aws_instance.instance]
 }
 
 resource local_file config {
@@ -17,7 +17,8 @@ resource local_file config {
       "public_dns": "${aws_instance.instance.public_dns}"
     }
 EOF
-  filename = "${local.output_folder}/${local.instance_name}-config.json"
+  filename = "./output/${local.instance_name}-config.json"
+  depends_on = [aws_instance.instance]
 }
 
 resource tls_private_key private_key {

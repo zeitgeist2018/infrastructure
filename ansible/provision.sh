@@ -1,5 +1,6 @@
 #!/bin/bash
 
+REGION=$1
 function notify() {
     echo $1
     if [ $2 == "success" ]; then
@@ -35,7 +36,7 @@ ENV=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
 echo "ENV=\"$ENV\"" >> /etc/environment
 
 if [[ -z ${ENV} ]]; then
-    notify "Self-provisioning failed: could not determine tags." "danger"
+    notify "Self-provisioning failed: could not detect environment." "danger"
     exit 1
 fi
 

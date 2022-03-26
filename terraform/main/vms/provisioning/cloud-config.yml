@@ -42,4 +42,4 @@ packages:
 
 runcmd:
   - chmod +x /home/ec2-user/ansible/provision.sh
-  - sh -c /home/ec2-user/ansible/provision.sh
+  - sh -c /home/ec2-user/ansible/provision.sh ${REGION}

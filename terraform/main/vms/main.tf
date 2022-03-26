@@ -38,7 +38,8 @@ module nodes {
   associate_public_ip_address = true
   cloud_init_file = file("${path.module}/provisioning/cloud-config.yml")
   cloud_init_vars = {
-    SLACK_WEBHOOK_URL = var.slack_webhook_url
     ENV = var.account.env
+    REGION = var.account.region
+    SLACK_WEBHOOK_URL = var.slack_webhook_url
   }
 }
