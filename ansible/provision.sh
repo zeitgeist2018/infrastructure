@@ -1,13 +1,7 @@
 #!/bin/bash
 
-SLACK_WEBHOOK_URL=$1
-
-function sendNotifications() {
-  sendSlackNotification "$@" || true
-  sendOpsgenieNotification "$@" || true
-}
-
-function slackMessage() {
+function notify() {
+    echo $1
     if [ $2 == "success" ]; then
         EMOJI=':green_heart:'
     elif [ $2 == "warning" ]; then
@@ -31,16 +25,30 @@ EOF
 
     curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
 }
-INSTANCE_FILE=/root/provision/instance.json
-env=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
 
-if [[ -z ${env} ]]; then
+notify "Starting provisioning of node." "success" || true
+
+cd /home/ec2-user/provision
+
+aws --region ${REGION} ec2 describe-tags --filter Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id) > /home/ec2-user/instance.json
+INSTANCE_FILE=/home/ec2-user/instance.json
+ENV=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
+echo "ENV=\"$ENV\"" >> /etc/environment
+
+if [[ -z ${ENV} ]]; then
     slackMessage "Self-provisioning failed: could not determine tags." "danger"
-#    shutdown
     exit 1
 fi
 
-cd /root/provision
+pip install awscli ansible==4.9.0
+
+slackMessage "Applying ansible playbook" "success" || true
+
+git clone https://github.com/zeitgeist2018/infrastructure.git && \
+  mv infrastructure/ansible /home/ec2-user/provision && \
+  rm -r infrastructure
+
+
 cat > inventory << EOF
 [localhost]
 127.0.0.1 ansible_connection=local
@@ -49,9 +57,8 @@ ansible-playbook --inventory inventory main.yml --diff
 
 if [ $? -ne 0 ]
 then
-    slackMessage "Provisioning for ${env} ansible failed." "error"
-#    shutdown
+    slackMessage "Provisioning for ${ENV} ansible failed." "error"
     exit 1
 else
-    slackMessage "Provisioning for ${env} ok." "success" || true
+    slackMessage "Provisioning for ${ENV} ok." "success" || true
 fi
