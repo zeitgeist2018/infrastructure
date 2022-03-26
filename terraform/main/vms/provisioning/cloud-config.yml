@@ -21,16 +21,17 @@ cloud_final_modules:
   - [scripts-user, always]
 
 write_files:
-  - path: /root/.aws/config
+  - path: /home/ec2-user/.aws/config
     permissions: 0644
     content: |
       [default]
-      region=us-east-1
+      region=${REGION}
   - path: /etc/environment
     append: true
     content: |
-      SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       ENV=${ENV}
+      SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      REGION=${REGION}
 
 timezone: Europe/London
 
