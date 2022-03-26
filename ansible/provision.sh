@@ -35,14 +35,14 @@ ENV=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
 echo "ENV=\"$ENV\"" >> /etc/environment
 
 if [[ -z ${ENV} ]]; then
-    slackMessage "Self-provisioning failed: could not determine tags." "danger"
+    notify "Self-provisioning failed: could not determine tags." "danger"
     exit 1
 fi
 
 cd /home/ec2-user/ansible
 pip install awscli ansible==4.9.0
 
-slackMessage "Applying ansible playbook" "success" || true
+notify "Applying ansible playbook" "success" || true
 
 cat > inventory << EOF
 [localhost]
@@ -52,8 +52,8 @@ ansible-playbook --inventory inventory main.yml --diff
 
 if [ $? -ne 0 ]
 then
-    slackMessage "Provisioning for ${ENV} ansible failed." "error"
+    notify "Provisioning for ${ENV} ansible failed." "error"
     exit 1
 else
-    slackMessage "Provisioning for ${ENV} ok." "success" || true
+    notify "Provisioning for ${ENV} ok." "success" || true
 fi
