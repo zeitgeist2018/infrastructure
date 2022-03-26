@@ -32,7 +32,7 @@ destroy:
 clean:
 	cd terraform && \
 	rm -fR terraform.* && \
-	rm -fR .terraform/modules
+	rm -fR .terraform
 
 ssh-node:
 	ssh -i ${NODE_KEY} -o StrictHostKeychecking=no -o IdentitiesOnly=yes "ec2-user@${NODE_IP}"
