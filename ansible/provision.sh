@@ -1,6 +1,12 @@
 #!/bin/bash
 
 REGION=$1
+
+if [[ -z ${REGION} ]]; then
+  echo You must provide the region parameter
+  exit 1
+fi
+
 function notify() {
     echo $1
     if [ $2 == "success" ]; then
