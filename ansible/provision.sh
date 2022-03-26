@@ -1,12 +1,5 @@
 #!/bin/bash
 
-REGION=$1
-
-if [[ -z ${REGION} ]]; then
-  echo You must provide the region parameter
-  exit 1
-fi
-
 function notify() {
     echo $1
     if [ $2 == "success" ]; then
@@ -34,17 +27,6 @@ EOF
 }
 
 notify "Starting provisioning of node." "success" || true
-
-
-INSTANCE_FILE=/home/ec2-user/instance.json
-aws --region ${REGION} ec2 describe-tags --filter Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id) > $INSTANCE_FILE
-ENV=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
-echo "ENV=\"$ENV\"" >> /etc/environment
-
-if [[ -z ${ENV} ]]; then
-    notify "Self-provisioning failed: could not detect environment." "danger"
-    exit 1
-fi
 
 cd /home/ec2-user/ansible
 pip install awscli ansible==4.9.0
