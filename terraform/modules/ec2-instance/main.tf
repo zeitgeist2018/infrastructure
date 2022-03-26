@@ -3,13 +3,13 @@ locals {
   instance_name = "${var.account.env}-${var.instance_name_suffix}"
 }
 
-resource local_file private_key_file {
+resource local_file private_key {
   content = tls_private_key.private_key.private_key_pem
   filename = "${local.output_folder}/${local.instance_name}-private-key.pem"
   file_permission = "600"
 }
 
-resource local_file instance_public_ip_file {
+resource local_file config {
   content = <<EOF
     {
       "public_ip": "${aws_instance.instance.public_ip}",
@@ -39,13 +39,15 @@ resource aws_eip elastic_ip {
 
 data template_file cloud_init {
   template = var.cloud_init_file
-  vars = var.cloud_init_vars
+  vars = merge({
+    REGION = var.account.region
+  }, var.cloud_init_vars)
 }
 
 resource aws_instance instance {
   ami = var.ami
   instance_type = var.instance_type
-
+  iam_instance_profile = aws_iam_instance_profile.instance.name
   vpc_security_group_ids = [var.sg_id]
   subnet_id = var.subnet_id
   private_ip = var.private_ip
@@ -53,6 +55,18 @@ resource aws_instance instance {
   key_name = aws_key_pair.instance_key_pair.key_name
 
   user_data = base64encode(data.template_file.cloud_init.rendered)
+
+  provisioner file {
+    source      = "${path.module}/../../../ansible"
+    destination = "/home/ec2-user/ansible"
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = file("${path.module}/../../output/${local.instance_name}-private-key.pem")
+      host        = self.public_dns
+    }
+  }
 
   root_block_device {
     delete_on_termination = true
