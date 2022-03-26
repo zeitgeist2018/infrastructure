@@ -29,7 +29,7 @@ EOF
 notify "Starting provisioning of node." "success" || true
 
 cd /home/ec2-user/ansible
-pip install awscli ansible==4.9.0
+sudo amazon-linux-extras install ansible2 -y
 
 notify "Applying ansible playbook" "success" || true
 
