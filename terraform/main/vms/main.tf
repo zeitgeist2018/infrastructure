@@ -28,8 +28,8 @@ module nodes {
   tags                        = var.tags
   vpc_id                      = var.vpc_id
   ami                         = "ami-0c02fb55956c7d316"
-  instance_type               = "t3a.nano"  // 2xCPU/512Mb/$3.50/month each
-#  instance_type               = "t3a.micro"  // 2xCPU/1Gb/$7/month each
+#  instance_type               = "t3a.nano"  // 2xCPU/512Mb/$3.50/month each
+  instance_type               = "t3a.micro"  // 2xCPU/1Gb/$7/month each
   instance_name_suffix        = count.index
   subnet_id                   = var.subnet_id
   sg_id                       = aws_security_group.sg.id
