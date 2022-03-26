@@ -9,7 +9,7 @@
 - name: Fix permissions
   shell: "{{ item }}"
   with_items:
-    - usermod -aG docker vagrant
+    - usermod -aG docker ec2-user
     - usermod -aG docker root
     - newgrp docker
 - name: Start Docker service
