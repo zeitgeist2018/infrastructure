@@ -28,10 +28,9 @@ EOF
 
 notify "Starting provisioning of node." "success" || true
 
-cd /home/ec2-user/provision
 
-aws --region ${REGION} ec2 describe-tags --filter Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id) > /home/ec2-user/instance.json
 INSTANCE_FILE=/home/ec2-user/instance.json
+aws --region ${REGION} ec2 describe-tags --filter Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id) > $INSTANCE_FILE
 ENV=$(cat $INSTANCE_FILE | jq -r '.[] | .[] | select(.Key=="ENV") | .Value')
 echo "ENV=\"$ENV\"" >> /etc/environment
 
@@ -40,14 +39,10 @@ if [[ -z ${ENV} ]]; then
     exit 1
 fi
 
+cd /home/ec2-user/ansible
 pip install awscli ansible==4.9.0
 
 slackMessage "Applying ansible playbook" "success" || true
-
-git clone https://github.com/zeitgeist2018/infrastructure.git && \
-  mv infrastructure/ansible /home/ec2-user/provision && \
-  rm -r infrastructure
-
 
 cat > inventory << EOF
 [localhost]
