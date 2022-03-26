@@ -1,0 +1,19 @@
+---
+
+- name: install docker
+  apt:
+    name:
+      - docker.io
+      - docker-compose
+    state: latest
+- name: Fix permissions
+  shell: "{{ item }}"
+  with_items:
+    - usermod -aG docker vagrant
+    - usermod -aG docker root
+    - newgrp docker
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes

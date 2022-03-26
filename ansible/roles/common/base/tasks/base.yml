@@ -1,0 +1,17 @@
+---
+
+# Basic stuff
+- name: remove unnecessary packages
+  apt:
+    name:
+      - java
+    state: absent
+- name: update all packages
+  apt:
+    name: '*'
+    state: latest
+- name: install basic tools
+  apt:
+    name:
+      - jq
+    state: latest
