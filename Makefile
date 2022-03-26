@@ -21,7 +21,8 @@ plan: init
 
 apply:
 	cd terraform && \
-	terraform apply -auto-approve -parallelism=5 terraform.plan
+	terraform apply -auto-approve -parallelism=5 terraform.plan && \
+	rm terraform.plan
 
 destroy:
 	cd terraform && \
