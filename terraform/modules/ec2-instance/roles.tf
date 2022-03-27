@@ -57,4 +57,16 @@ data aws_iam_policy_document instance_permissions {
       "*",
     ]
   }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:*"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
 }
