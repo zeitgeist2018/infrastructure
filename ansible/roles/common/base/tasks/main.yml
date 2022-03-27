@@ -1,4 +1,6 @@
 ---
 
+- name: Python
+  import_tasks: python.yml
 - name: Docker
   import_tasks: docker.yml
