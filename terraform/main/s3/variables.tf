@@ -5,3 +5,7 @@ variable account {
 variable tags {
   type = map(string)
 }
+
+variable ec2_role_arn {
+  type = string
+}

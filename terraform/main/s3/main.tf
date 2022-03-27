@@ -29,7 +29,7 @@ data aws_iam_policy_document policy {
 
     principals {
       type        = "AWS"
-      identifiers = [var.account.id]
+      identifiers = [var.ec2_role_arn]
     }
 
     actions = [

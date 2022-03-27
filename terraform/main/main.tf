@@ -28,6 +28,7 @@ module buckets {
 
   account = var.account
   tags    = local.common_tags
+  ec2_role_arn = module.vms.ec2_role
 }
 
 module budgets {
