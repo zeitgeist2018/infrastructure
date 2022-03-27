@@ -14,11 +14,11 @@ resource local_file private_key {
 
 resource local_file config {
   content    = <<EOF
-    {
-      "public_ip": "${aws_instance.instance.public_ip}",
-      "private_ip": "${aws_instance.instance.private_ip}",
-      "public_dns": "${aws_instance.instance.public_dns}"
-    }
+{
+  "public_ip": "${aws_instance.instance.public_ip}",
+  "private_ip": "${aws_instance.instance.private_ip}",
+  "public_dns": "${aws_instance.instance.public_dns}"
+}
 EOF
   filename   = local.output.config
   depends_on = [aws_instance.instance]

@@ -15,11 +15,18 @@ module network {
 module vms {
   source = "./vms"
 
-  account   = var.account
-  tags      = local.common_tags
-  vpc_id    = module.network.vpc_id
-  subnet_id = module.network.subnet_ids.private_0
+  account           = var.account
+  tags              = local.common_tags
+  vpc_id            = module.network.vpc_id
+  subnet_id         = module.network.subnet_ids.private_0
   slack_webhook_url = var.slack_webhook_url
+}
+
+module buckets {
+  source = "./s3"
+
+  account = var.account
+  tags    = local.common_tags
 }
 
 module budgets {
