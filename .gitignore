@@ -4,3 +4,4 @@
 .terraform*
 *.plan
 output
+inventory
