@@ -20,6 +20,7 @@ module vms {
   vpc_id            = module.network.vpc_id
   subnet_id         = module.network.subnet_ids.private_0
   slack_webhook_url = var.slack_webhook_url
+  bucket = module.buckets.bucket_name
 }
 
 module buckets {

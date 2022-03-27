@@ -41,5 +41,6 @@ module nodes {
     ENV = var.account.env
     REGION = var.account.region
     SLACK_WEBHOOK_URL = var.slack_webhook_url
+    BUCKET = var.bucket
   }
 }

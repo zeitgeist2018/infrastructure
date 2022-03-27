@@ -1,3 +1,4 @@
 ---
 user: ec2-user
 env: "{{ lookup('env', 'ENV') }}"
+bucket: "{{ lookup('env', 'BUCKET') }}"

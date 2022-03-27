@@ -17,3 +17,7 @@ variable tags {
 variable slack_webhook_url {
   type = string
 }
+
+variable bucket {
+  type = string
+}
