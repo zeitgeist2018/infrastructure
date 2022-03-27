@@ -1,0 +1,21 @@
+---
+
+- name: Download manager config file
+  aws_s3:
+    bucket: {{ bucket }}
+    mode: get
+    object: orchestration/manager.json
+    dest: manager_config.json
+- name: Get cluster values
+  shell: "cat manager_config.json | jq -r '.{{ item }}'"
+  register: "{{ item }}"
+  with_items:
+    - "manager_ip"
+    - "manager_token"
+    - "worker_token"
+
+- name: Join cluster
+  shell: >
+    docker swarm join
+    --token={{ manager_token }}
+    {{ manager_ip }}:2377

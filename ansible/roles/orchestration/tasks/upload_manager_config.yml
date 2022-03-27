@@ -1,0 +1,20 @@
+---
+
+- name: Init swarm
+  shell: >
+    docker swarm init 
+    --advertise-addr {{ ansible_ssh_host }} 
+    --force-new-cluster
+- name: Get join token
+  shell: docker swarm join-token -q manager
+  register: manager_token
+- name: Get join token
+  shell: docker swarm join-token -q worker
+  register: worker_token
+- name: Upload manager config file
+  aws_s3:
+    bucket: {{ bucket }}
+    mode: put
+    object: orchestration/manager.json
+    src: manager_config.json.j2
+
