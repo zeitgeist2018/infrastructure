@@ -46,4 +46,4 @@ runcmd:
   - git clone https://github.com/zeitgeist2018/infrastructure.git
   - mv infrastructure/ansible /home/ec2-user/ansible && rm -r infrastructure
   - chmod +x /home/ec2-user/ansible/provision.sh
-  - sh -c /home/ec2-user/ansible/provision.sh
+  - sudo sh -c /home/ec2-user/ansible/provision.sh

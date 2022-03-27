@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p /var/log/provision
+exec >/var/log/provision/provision.log 2>/var/log/provision/provision-error.log
+
 function notify() {
     echo $1
     if [ $2 == "success" ]; then
