@@ -1,19 +1,21 @@
 ---
 
-- name: install docker
-  yum:
-    name:
-      - docker.io
-      - docker-compose
-    state: latest
-- name: Fix permissions
+- name: Install docker
   shell: "{{ item }}"
   with_items:
+    - amazon-linux-extras install docker -y
     - usermod -aG docker ec2-user
-    - usermod -aG docker root
     - newgrp docker
 - name: Start Docker service
   service:
     name: docker
     state: started
     enabled: yes
+- name: Install docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-linux-x86_64"
+    dest: "/usr/local/bin/docker-compose"
+- name: Set docker-compose permissions
+  file:
+    path: /usr/local/bin/docker-compose
+    mode: +x
