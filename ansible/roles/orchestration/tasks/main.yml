@@ -2,10 +2,10 @@
 
 - name: Check if cluster bootstrap file exists
   aws_s3:
-    bucket: {{ bucket }}
+    bucket: "{{ bucket }}"
     mode: list
     prefix: orchestration/manager.json
-    register: manager_config
+  register: manager_config
 - name: Upload manager config
   import_tasks: upload_manager_config.yml
   when: manager_config is defined
