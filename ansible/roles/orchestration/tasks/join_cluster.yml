@@ -2,7 +2,7 @@
 
 - name: Download manager config file
   aws_s3:
-    bucket: {{ bucket }}
+    bucket: "{{ bucket }}"
     mode: get
     object: orchestration/manager.json
     dest: manager_config.json

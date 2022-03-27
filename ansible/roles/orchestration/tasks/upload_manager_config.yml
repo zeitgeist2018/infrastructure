@@ -13,7 +13,7 @@
   register: worker_token
 - name: Upload manager config file
   aws_s3:
-    bucket: {{ bucket }}
+    bucket: "{{ bucket }}"
     mode: put
     object: orchestration/manager.json
     src: manager_config.json.j2
