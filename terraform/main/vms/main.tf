@@ -21,7 +21,7 @@ resource aws_security_group sg {
 
 // TODO: Create security group with proper route tables
 module nodes {
-  count  = 1
+  count  = 2
   source = "../../modules/ec2-instance"
 
   account                     = var.account
