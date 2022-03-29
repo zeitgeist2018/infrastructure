@@ -13,20 +13,24 @@ function notify() {
         EMOJI=':red_circle:'
     fi
 
-    read -r -d '' JSON << EOF
-    {
-      "channel": "#infrastructure-events",
-      "attachments": [
-        {
-            "title": "$(hostname)",
-            "color": "$2",
-            "text": "${EMOJI} $1"
-        }
-      ]
-    }
+    sendSlackMessage "${EMOJI} $1" $2
+}
+
+function sendSlackMessage() {
+  read -r -d '' JSON << EOF
+      {
+        "channel": "#infrastructure-events",
+        "attachments": [
+          {
+              "title": "$(hostname)",
+              "color": "$2",
+              "text": "$1"
+          }
+        ]
+      }
 EOF
 
-    curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
+      curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
 }
 
 notify "Starting provisioning of node." "success" || true
