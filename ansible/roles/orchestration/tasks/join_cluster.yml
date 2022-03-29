@@ -17,7 +17,7 @@
   register: worker_token
 - name: Join cluster
   shell: >
-    docker swarm leave --force &&
+    docker swarm leave --force || true &&
     docker swarm join
     --token={{ manager_token.stdout }}
     {{ manager_ip.stdout }}
