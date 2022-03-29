@@ -51,7 +51,7 @@ data template_file cloud_init {
 resource aws_instance instance {
   ami                         = var.ami
   instance_type               = var.instance_type
-  iam_instance_profile        = aws_iam_instance_profile.instance.name
+  iam_instance_profile        = var.instance_profile_name
   vpc_security_group_ids      = [var.sg_id]
   subnet_id                   = var.subnet_id
   private_ip                  = var.private_ip

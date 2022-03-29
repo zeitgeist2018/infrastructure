@@ -53,3 +53,7 @@ variable cloud_init_file {
 
 variable cloud_init_vars {
 }
+
+variable instance_profile_name {
+  type = string
+}
