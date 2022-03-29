@@ -11,10 +11,14 @@
 - name: Get join token
   shell: docker swarm join-token -q worker
   register: worker_token
+- name: Generate manager config file
+  template:
+    src: manager_config.json.j2
+    dest: manager_config.json
 - name: Upload manager config file
   aws_s3:
     bucket: "{{ bucket }}"
     mode: put
     object: orchestration/manager.json
-    src: manager_config.json.j2
+    src: manager_config.json
 
