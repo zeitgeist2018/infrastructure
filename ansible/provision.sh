@@ -1,13 +1,16 @@
 #!/bin/bash
 
-mkdir -p /var/log/provision
-exec >/var/log/provision/provision.log 2>/var/log/provision/provision-error.log
+LOG_FOLDER=/var/log/provision
+LOG_FILE="$LOG_FOLDER/provision.log"
+LOG_ERROR_FILE="$LOG_FOLDER/provision.error.log"
+mkdir -p $LOG_FOLDER
+exec >$LOG_FILE 2>$LOG_ERROR_FILE
 
 SLACK_CHANNEL="#infrastructure-events"
 PRIVATE_IP=$(ifconfig eth0 | grep -w inet | awk '{print $2}')
 
 function notify() {
-    echo $1
+#    echo $1
     if [ $2 == "success" ]; then
         EMOJI=':green_heart:'
     elif [ $2 == "warning" ]; then
@@ -51,8 +54,10 @@ ansible-playbook --inventory inventory main.yml --diff
 
 if [ $? -ne 0 ]
 then
-    notify "Provisioning for ${ENV} ansible failed." "error"
+    echo "Provisioning for ${ENV} ansible failed."
+    sendSlackMessage "Provisioning for ${ENV} ansible failed." "error"
     exit 1
 else
-    notify "Provisioning for ${ENV} ok." "success" || true
+    echo "Provisioning for ${ENV} ok."
+    sendSlackMessage "Provisioning for ${ENV} ok." "success" || true
 fi
