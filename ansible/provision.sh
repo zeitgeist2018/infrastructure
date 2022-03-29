@@ -3,6 +3,8 @@
 mkdir -p /var/log/provision
 exec >/var/log/provision/provision.log 2>/var/log/provision/provision-error.log
 
+PRIVATE_IP=$(ifconfig eth0 | grep -w inet | awk '{print $2}')
+
 function notify() {
     echo $1
     if [ $2 == "success" ]; then
@@ -22,7 +24,7 @@ function sendSlackMessage() {
         "channel": "#infrastructure-events",
         "attachments": [
           {
-              "title": "$(hostname)",
+              "title": "Node: $PRIVATE_IP",
               "color": "$2",
               "text": "$1"
           }
