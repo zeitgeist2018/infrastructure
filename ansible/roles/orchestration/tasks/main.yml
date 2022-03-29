@@ -6,9 +6,11 @@
     mode: list
     prefix: orchestration/manager.json
   register: manager_config
-- name: Upload manager config
-  import_tasks: upload_manager_config.yml
-  when: manager_config is defined
+
+- name: Start cluster
+  import_tasks: start_cluster.yml
+  when: manager_config.s3_keys |length == 0
+
 - name: Join existing cluster
   import_tasks: join_cluster.yml
-  when: manager_config is not defined
+  when: manager_config.s3_keys |length > 0

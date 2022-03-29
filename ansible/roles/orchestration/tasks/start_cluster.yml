@@ -3,18 +3,22 @@
 - name: Init swarm
   shell: >
     docker swarm init 
-    --advertise-addr {{ ansible_ssh_host }} 
+    --advertise-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} 
     --force-new-cluster
+
 - name: Get join token
   shell: docker swarm join-token -q manager
   register: manager_token
+
 - name: Get join token
   shell: docker swarm join-token -q worker
   register: worker_token
+
 - name: Generate manager config file
   template:
     src: manager_config.json.j2
     dest: manager_config.json
+
 - name: Upload manager config file
   aws_s3:
     bucket: "{{ bucket }}"
