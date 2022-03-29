@@ -3,6 +3,7 @@
 mkdir -p /var/log/provision
 exec >/var/log/provision/provision.log 2>/var/log/provision/provision-error.log
 
+SLACK_CHANNEL="#infrastructure-events"
 PRIVATE_IP=$(ifconfig eth0 | grep -w inet | awk '{print $2}')
 
 function notify() {
@@ -21,7 +22,7 @@ function notify() {
 function sendSlackMessage() {
   read -r -d '' JSON << EOF
       {
-        "channel": "#infrastructure-events",
+        "channel": "$SLACK_CHANNEL",
         "attachments": [
           {
               "title": "Node: $PRIVATE_IP",
@@ -32,7 +33,7 @@ function sendSlackMessage() {
       }
 EOF
 
-      curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
+  curl -X POST -H 'Content-type: application/json' $SLACK_WEBHOOK_URL --data "${JSON}"
 }
 
 notify "Starting provisioning of node." "success" || true
