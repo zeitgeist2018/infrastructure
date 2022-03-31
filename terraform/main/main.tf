@@ -24,6 +24,7 @@ module vms {
 }
 
 module buckets {
+  count = 0
   source = "./s3"
 
   account = var.account
