@@ -40,3 +40,10 @@ module budgets {
   budget_threshold_percentage = var.budget.threshold_percentage
   budget_services             = var.budget_services
 }
+
+module db {
+  source = "./db"
+
+  account = var.account
+  tags = local.common_tags
+}
