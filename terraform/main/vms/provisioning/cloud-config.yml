@@ -33,6 +33,7 @@ write_files:
       SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       REGION=${REGION}
       BUCKET=${BUCKET}
+      NODE_TYPE=${NODE_TYPE}
 
 timezone: Europe/London
 
