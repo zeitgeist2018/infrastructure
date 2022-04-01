@@ -1,9 +1,8 @@
+import boto3
+import docker
 import os
 import time
 from enum import Enum
-
-import boto3
-import docker
 
 from .logging_service import LoggingService
 
@@ -40,20 +39,35 @@ class NodeType(Enum):
 class NodeService:
     def __init__(self):
         self.docker_client = docker.from_env()
-        env = os.getenv("ENV")
-        region = os.getenv("REGION")
-        dynamodb = boto3.resource('dynamodb', region_name=region)
+        # env = os.getenv("ENV")
+        env = 'dev'
+        # region = os.getenv("REGION")
+        region = 'us-east-1'
+        dynamodb = boto3.resource('dynamodb', region_name=region, aws_access_key_id='AKIAYEDUZLHGFVF27U5V',
+                                  aws_secret_access_key='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')
         self.db = dynamodb.Table(f'{env}-cluster_control')
-        self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $2}\'').read().strip()
+        # self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $2}\'').read().strip()
+        self.node_ip = '192.168.100.128'
 
-    def get_registered_nodes(self):
-        return list(map(lambda node: {
+    def get_previous_node_status(self):
+        entry = self.db.query(
+            KeyConditionExpression=Key('IP').eq(self.node_ip)
+        ).get('Items', [])
+        if entry is not None:
+            return NodeStatus.value_of(entry['Items'][0]['STATUS'])
+
+    def get_registered_nodes(self, skip_self: bool = True):
+        nodes = list(map(lambda node: {
             'IP': node['IP'],
             'STATUS': NodeStatus.value_of(node['STATUS']),
             'TYPE': NodeType.value_of(node['TYPE']),
             'MANAGER_TOKEN': node.get('MANAGER_TOKEN'),
             'WORKER_TOKEN': node.get('WORKER_TOKEN')
         }, self.db.scan().get('Items', [])))
+        if skip_self:
+            return list(filter(lambda node: node['IP'] != self.node_ip, nodes))
+        else:
+            return nodes
 
     def get_manager_token(self):
         return self.docker_client.swarm.attrs["JoinTokens"]["Manager"]
@@ -71,10 +85,10 @@ class NodeService:
             if f(item):
                 return item
 
-    def register_node(self, type: NodeType, status: NodeStatus, error: str = None):
+    def register_node(self, status: NodeStatus, error: str = None):
         item = {
             'IP': self.node_ip,
-            'TYPE': type.name,
+            'TYPE': self.get_node_type().name,
             'STATUS': status.name,
             'UPDATED_ON': self.current_time_millis()
         }
@@ -106,31 +120,49 @@ class NodeService:
 
     def update_node(self):
         try:
-            all_registered_nodes = self.get_registered_nodes()
-            registered_nodes = list(filter(lambda node: node['IP'] != self.node_ip, all_registered_nodes))
-            bootstrap_node = self.find(lambda node: node['STATUS'] == NodeStatus.BOOTSTRAP, registered_nodes)
-            cluster_manager_nodes = list(filter(
-                lambda node: node['STATUS'] == NodeStatus.CLUSTER and node['TYPE'] == NodeType.MANAGER,
-                registered_nodes
-            ))
-
-            swarm_active = len(self.docker_client.swarm.attrs) > 0
-
-            if bootstrap_node is not None:
-                log.info(f'Bootstrap node found on {bootstrap_node["IP"]}')
-                if swarm_active:
-                    log.warn('Leaving current cluster')
-                    self.docker_client.swarm.leave(True)
-                log.info('Joining bootstrap node')
-                self.join_cluster(bootstrap_node['IP'], self.extract_token(bootstrap_node))
-                self.register_node(self.get_node_type(), NodeStatus.CLUSTER)
-            elif len(cluster_manager_nodes) > 0:
-                print('Joining existing cluster')
-                self.join_cluster(cluster_manager_nodes['IP'], self.extract_token(cluster_manager_nodes))
-                self.register_node(self.get_node_type(), NodeStatus.CLUSTER)
+            registered_nodes = self.get_registered_nodes()
+            other_manager_nodes = list(filter(lambda node:
+                                              (node['STATUS'] == NodeStatus.BOOTSTRAP or
+                                               node['STATUS'] == NodeStatus.CLUSTER)
+                                              and node['TYPE'] == NodeType.MANAGER,
+                                              registered_nodes
+                                              ))
+            try:
+                connected_to_cluster = len(self.docker_client.nodes.list()) > 1
+            except Exception as e:
+                connected_to_cluster = False
+            if self.get_node_type() == NodeType.MANAGER:
+                if connected_to_cluster:
+                    log.debug("Already connected to cluster, nothing to do")
+                    self.register_node(NodeStatus.CLUSTER)
+                else:
+                    was_bootstrap = self.get_previous_node_status() == NodeStatus.BOOTSTRAP
+                    if was_bootstrap:
+                        log.info("Waiting for other nodes")
+                        self.register_node(NodeStatus.BOOTSTRAP)
+                    else:
+                        if len(other_manager_nodes) > 0:
+                            manager = other_manager_nodes[0]
+                            ip = manager['IP']
+                            log.info(f'Found another manager, connecting to it on {ip}')
+                            self.join_cluster(ip, self.extract_token(manager))
+                            self.register_node(NodeStatus.CLUSTER)
+                        else:
+                            log.info('Registering as bootstrap')
+                            self.register_node(NodeStatus.BOOTSTRAP)
             else:
-                print('Registering as bootstrap node')
-                self.register_node(self.get_node_type(), NodeStatus.BOOTSTRAP)
+                if connected_to_cluster:
+                    log.debug("Already connected to cluster, nothing to do")
+                    self.register_node(NodeStatus.CLUSTER)
+                else:
+                    if len(other_manager_nodes) > 0:
+                        manager = other_manager_nodes[0]
+                        ip = manager['IP']
+                        log.info(f'Found a manager, connecting to it on {ip}')
+                        self.join_cluster(ip, self.extract_token(manager))
+                        self.register_node(NodeStatus.CLUSTER)
+                    else:
+                        log.info('No managers found yet, waiting...')
         except Exception as e:
             log.err(e)
-            self.register_node(self.get_node_type(), NodeStatus.ERROR, str(e))
+            self.register_node(NodeStatus.ERROR, str(e))
