@@ -1,0 +1,26 @@
+---
+
+- name: Set vars
+  set_fact:
+    working_dir: "{{ root_dir }}/controller"
+    log_dir: "/var/log/controller"
+
+- name: Copy controller source
+  copy: src=src/ dest="{{ working_dir }}"
+
+- name: Create log directory
+  file: path={{ log_dir }} state=directory
+
+- name: Install python dependencies
+  shell: "pip3 install --user -r {{ working_dir }}/requirements.txt"
+
+- name: Install controller
+  cron:
+    name: "Node controller"
+    month: "*"
+    weekday: "*"
+    day: "*"
+    hour: "*"
+    minute: "*"
+    job: "/usr/bin/python3 {{ working_dir }}/main.py > {{ log_dir }}/controller.log 2>&1"
+    disabled: "no"
