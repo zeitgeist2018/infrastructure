@@ -1,4 +1,5 @@
 ---
 user: ec2-user
+root_dir: /home/{{ user }}
 env: "{{ lookup('env', 'ENV') }}"
 bucket: "{{ lookup('env', 'BUCKET') }}"
