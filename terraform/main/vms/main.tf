@@ -42,8 +42,8 @@ module nodes {
     ENV               = var.account.env
     REGION            = var.account.region
     SLACK_WEBHOOK_URL = var.slack_webhook_url
-    SLACK_TOKEN = var.slack_token
+    SLACK_TOKEN       = var.slack_token
     BUCKET            = var.bucket
-    NODE_TYPE         = 'MANAGER'
+    NODE_TYPE         = "MANAGER"
   }
 }
