@@ -1,4 +1,5 @@
 import boto3
+from boto3.dynamodb.conditions import Key
 import docker
 import os
 import time
@@ -6,6 +7,7 @@ from enum import Enum
 
 from .logging_service import LoggingService
 from .slack_service import SlackService
+
 
 class NodeStatus(Enum):
     BOOTSTRAP = 1
