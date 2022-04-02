@@ -6,6 +6,9 @@ resource aws_dynamodb_table cluster {
   write_capacity = 1
   hash_key = "IP"
   tags = var.tags
+  ttl {
+    attribute_name = "TTL"
+  }
 
   attribute {
     name = "IP"
