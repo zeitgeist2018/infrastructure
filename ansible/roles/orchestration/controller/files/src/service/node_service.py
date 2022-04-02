@@ -55,7 +55,7 @@ class NodeService:
             KeyConditionExpression=Key('IP').eq(self.node_ip)
         ).get('Items', [])
         if entry is not None:
-            return NodeStatus.value_of(entry['Items'][0]['STATUS'])
+            return NodeStatus.value_of(entry[0]['STATUS'])
 
     def get_registered_nodes(self, skip_self: bool = True):
         nodes = list(map(lambda node: {
@@ -179,3 +179,4 @@ class NodeService:
         except Exception as e:
             self.log.err(e)
             self.register_node(NodeStatus.ERROR, str(e))
+            raise e
