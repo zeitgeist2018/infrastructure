@@ -4,6 +4,7 @@ import os
 import time
 from boto3.dynamodb.conditions import Key
 from enum import Enum
+from datetime import datetime
 
 from .logging_service import LoggingService
 from .slack_service import SlackService
@@ -42,13 +43,10 @@ class NodeService:
         self.log = log_service
         self.docker_client = docker.from_env()
         env = os.getenv("ENV")
-        # env = 'dev'
         region = os.getenv("REGION")
-        # region = 'us-east-1'
         dynamodb = boto3.resource('dynamodb', region_name=region)
         self.db = dynamodb.Table(f'{env}-cluster_control')
         self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $1}\'').read().strip()
-        # self.node_ip = '192.168.100.128'
 
     def get_previous_node_status(self):
         entry = self.db.query(
@@ -91,7 +89,8 @@ class NodeService:
             'IP': self.node_ip,
             'TYPE': self.get_node_type().name,
             'STATUS': status.name,
-            'UPDATED_ON': self.current_time_millis()
+            'UPDATED_ON': self.current_time_millis(),
+            'TTL': int(datetime.now().timestamp()) + (60 * 3)
         }
         if type == NodeType.MANAGER and status != NodeStatus.ERROR:
             item['MANAGER_TOKEN'] = self.get_manager_token()
