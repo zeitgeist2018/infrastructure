@@ -49,11 +49,11 @@ class NodeService:
         self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $1}\'').read().strip()
 
     def get_previous_node_status(self):
-        entry = self.db.query(
+        entries = self.db.query(
             KeyConditionExpression=Key('IP').eq(self.node_ip)
         ).get('Items', [])
-        if entry is not None:
-            return NodeStatus.value_of(entry[0]['STATUS'])
+        if len(entries) > 0:
+            return NodeStatus.value_of(entries[0]['STATUS'])
 
     def get_registered_nodes(self, skip_self: bool = True):
         nodes = list(map(lambda node: {
@@ -92,7 +92,7 @@ class NodeService:
             'UPDATED_ON': self.current_time_millis(),
             'TTL': int(datetime.now().timestamp()) + (60 * 3)
         }
-        if type == NodeType.MANAGER and status != NodeStatus.ERROR:
+        if self.get_node_type() == NodeType.MANAGER and status != NodeStatus.ERROR:
             item['MANAGER_TOKEN'] = self.get_manager_token()
             item['WORKER_TOKEN'] = self.get_worker_token()
         if error:
@@ -112,11 +112,22 @@ class NodeService:
             return node['WORKER_TOKEN']
 
     def join_cluster(self, ip, token):
+        self.docker_client.swarm.leave(force=True)
         self.docker_client.swarm.join(
             remote_addrs=[ip],
             join_token=token,
             advertise_addr=self.node_ip
         )
+
+    def get_node_with_smaller_ip(self, nodes):
+        own_segment = int(self.node_ip.split('.')[-1])
+        last_segment = 255
+        node = None
+        for n in nodes:
+            segment = int(n['IP'].split('.')[-1])
+            if segment <= last_segment and segment < own_segment:
+                node = n
+        return node
 
     def update_node(self):
         try:
@@ -137,9 +148,17 @@ class NodeService:
                     self.register_node(NodeStatus.CLUSTER)
                 else:
                     was_bootstrap = self.get_previous_node_status() == NodeStatus.BOOTSTRAP
+
                     if was_bootstrap:
-                        self.log.info("Waiting for other nodes")
-                        self.register_node(NodeStatus.BOOTSTRAP)
+                        other_bootstrap_nodes = list(filter(lambda node: node['STATUS'] == NodeStatus.BOOTSTRAP, other_manager_nodes))
+                        if len(other_bootstrap_nodes) > 0:
+                            other_bootstrap_node = self.get_node_with_smaller_ip(other_bootstrap_nodes)
+                            self.log.info(f'Found another bootstrap node in {other_bootstrap_node["IP"]}, connecting')
+                            self.join_cluster(other_bootstrap_node['IP'], self.extract_token(other_bootstrap_node))
+                            self.register_node(NodeStatus.BOOTSTRAP)
+                        else:
+                            self.log.info("Waiting for other nodes")
+                            self.register_node(NodeStatus.BOOTSTRAP)
                     else:
                         if len(other_manager_nodes) > 0:
                             manager = other_manager_nodes[0]
@@ -152,6 +171,11 @@ class NodeService:
                             self.register_node(NodeStatus.CLUSTER)
                         else:
                             self.log.info('Registering as bootstrap')
+                            self.docker_client.swarm.init(
+                                advertise_addr=self.node_ip,
+                                listen_addr=self.node_ip,
+                                force_new_cluster=True
+                            )
                             self.slack_service.send_message(
                                 f'{self.node_ip}: Registering as bootstrap'
                             )
