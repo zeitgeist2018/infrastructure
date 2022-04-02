@@ -4,4 +4,5 @@ module main {
   budget = var.budget
   budget_services = var.budget_services
   slack_webhook_url = var.slack_webhook_url
+  slack_token = var.slack_token
 }

@@ -14,3 +14,7 @@ variable budget_services {
 variable slack_webhook_url {
   type = string
 }
+
+variable slack_token {
+  type = string
+}

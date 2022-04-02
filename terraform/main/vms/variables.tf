@@ -18,6 +18,10 @@ variable slack_webhook_url {
   type = string
 }
 
+variable slack_token {
+  type = string
+}
+
 variable bucket {
   type = string
 }

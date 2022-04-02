@@ -131,7 +131,7 @@ class NodeService:
                 connected_to_cluster = len(self.docker_client.nodes.list()) > 1
             except Exception as e:
                 connected_to_cluster = False
-            if self.get_node_type() == NodeType.MANAGER:
+            if self.get_node_type() == NodeType.MANAGER:    # Manager flow
                 if connected_to_cluster:
                     log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
@@ -150,7 +150,7 @@ class NodeService:
                         else:
                             log.info('Registering as bootstrap')
                             self.register_node(NodeStatus.BOOTSTRAP)
-            else:
+            else:    # Worker flow
                 if connected_to_cluster:
                     log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
