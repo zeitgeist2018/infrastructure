@@ -39,15 +39,14 @@ class NodeType(Enum):
 class NodeService:
     def __init__(self):
         self.docker_client = docker.from_env()
-        # env = os.getenv("ENV")
-        env = 'dev'
-        # region = os.getenv("REGION")
-        region = 'us-east-1'
-        dynamodb = boto3.resource('dynamodb', region_name=region, aws_access_key_id='AKIAYEDUZLHGFVF27U5V',
-                                  aws_secret_access_key='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')
+        env = os.getenv("ENV")
+        # env = 'dev'
+        region = os.getenv("REGION")
+        # region = 'us-east-1'
+        dynamodb = boto3.resource('dynamodb', region_name=region)
         self.db = dynamodb.Table(f'{env}-cluster_control')
-        # self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $2}\'').read().strip()
-        self.node_ip = '192.168.100.128'
+        self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $2}\'').read().strip()
+        # self.node_ip = '192.168.100.128'
 
     def get_previous_node_status(self):
         entry = self.db.query(
