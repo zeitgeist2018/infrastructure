@@ -5,9 +5,7 @@ import time
 from enum import Enum
 
 from .logging_service import LoggingService
-
-log = LoggingService()
-
+from .slack_service import SlackService
 
 class NodeStatus(Enum):
     BOOTSTRAP = 1
@@ -37,7 +35,9 @@ class NodeType(Enum):
 
 
 class NodeService:
-    def __init__(self):
+    def __init__(self, slack_service: SlackService, log_service: LoggingService):
+        self.slack_service = slack_service
+        self.log = log_service
         self.docker_client = docker.from_env()
         env = os.getenv("ENV")
         # env = 'dev'
@@ -132,36 +132,48 @@ class NodeService:
                 connected_to_cluster = False
             if self.get_node_type() == NodeType.MANAGER:    # Manager flow
                 if connected_to_cluster:
-                    log.debug("Already connected to cluster, nothing to do")
+                    self.log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
                 else:
                     was_bootstrap = self.get_previous_node_status() == NodeStatus.BOOTSTRAP
                     if was_bootstrap:
-                        log.info("Waiting for other nodes")
+                        self.log.info("Waiting for other nodes")
                         self.register_node(NodeStatus.BOOTSTRAP)
                     else:
                         if len(other_manager_nodes) > 0:
                             manager = other_manager_nodes[0]
                             ip = manager['IP']
-                            log.info(f'Found another manager, connecting to it on {ip}')
+                            self.log.info(f'Found another manager, connecting to it on {ip}')
+                            self.slack_service.send_message(
+                                f'{self.node_ip}: Found another manager, connecting to it on {ip}'
+                            )
                             self.join_cluster(ip, self.extract_token(manager))
                             self.register_node(NodeStatus.CLUSTER)
                         else:
-                            log.info('Registering as bootstrap')
+                            self.log.info('Registering as bootstrap')
+                            self.slack_service.send_message(
+                                f'{self.node_ip}: Registering as bootstrap'
+                            )
                             self.register_node(NodeStatus.BOOTSTRAP)
             else:    # Worker flow
                 if connected_to_cluster:
-                    log.debug("Already connected to cluster, nothing to do")
+                    self.log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
                 else:
                     if len(other_manager_nodes) > 0:
                         manager = other_manager_nodes[0]
                         ip = manager['IP']
-                        log.info(f'Found a manager, connecting to it on {ip}')
+                        self.log.info(f'Worker found a manager, connecting to it on {ip}')
+                        self.slack_service.send_message(
+                            f'{self.node_ip}: Worker found a manager, connecting to it on {ip}'
+                        )
                         self.join_cluster(ip, self.extract_token(manager))
                         self.register_node(NodeStatus.CLUSTER)
                     else:
-                        log.info('No managers found yet, waiting...')
+                        self.log.info('No managers found yet, waiting...')
+                        self.slack_service.send_message(
+                            f'{self.node_ip}: Worker hasn\'t found any managers yet. Waiting...'
+                        )
         except Exception as e:
-            log.err(e)
+            self.log.err(e)
             self.register_node(NodeStatus.ERROR, str(e))
