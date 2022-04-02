@@ -1,8 +1,8 @@
 import boto3
-from boto3.dynamodb.conditions import Key
 import docker
 import os
 import time
+from boto3.dynamodb.conditions import Key
 from enum import Enum
 
 from .logging_service import LoggingService
@@ -47,7 +47,7 @@ class NodeService:
         # region = 'us-east-1'
         dynamodb = boto3.resource('dynamodb', region_name=region)
         self.db = dynamodb.Table(f'{env}-cluster_control')
-        self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $2}\'').read().strip()
+        self.node_ip = os.popen('hostname --all-ip-addresses | awk \'{print $1}\'').read().strip()
         # self.node_ip = '192.168.100.128'
 
     def get_previous_node_status(self):
@@ -132,7 +132,7 @@ class NodeService:
                 connected_to_cluster = len(self.docker_client.nodes.list()) > 1
             except Exception as e:
                 connected_to_cluster = False
-            if self.get_node_type() == NodeType.MANAGER:    # Manager flow
+            if self.get_node_type() == NodeType.MANAGER:  # Manager flow
                 if connected_to_cluster:
                     self.log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
@@ -157,7 +157,7 @@ class NodeService:
                                 f'{self.node_ip}: Registering as bootstrap'
                             )
                             self.register_node(NodeStatus.BOOTSTRAP)
-            else:    # Worker flow
+            else:  # Worker flow
                 if connected_to_cluster:
                     self.log.debug("Already connected to cluster, nothing to do")
                     self.register_node(NodeStatus.CLUSTER)
