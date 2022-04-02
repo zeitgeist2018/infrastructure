@@ -32,10 +32,9 @@ data aws_iam_policy_document instance_permissions {
     effect = "Allow"
 
     actions = [
-      #      "ec2:AssignPrivateIpAddresses",
       "ec2:DescribeInstances",
       "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribeTags",
+      "ec2:DescribeTags"
     ]
 
     resources = [
@@ -62,7 +61,7 @@ data aws_iam_policy_document instance_permissions {
     effect = "Allow"
 
     actions = [
-      "s3:*"
+      "dynamodb:*"
     ]
 
     resources = [
