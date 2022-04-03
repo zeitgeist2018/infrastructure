@@ -4,3 +4,5 @@
   import_tasks: python.yml
 - name: Docker
   import_tasks: docker.yml
+- name: Fail2Ban
+  import_tasks: fail2ban.yml
