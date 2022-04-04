@@ -8,6 +8,7 @@ resource aws_dynamodb_table cluster {
   tags = var.tags
   ttl {
     attribute_name = "TTL"
+    enabled = true
   }
 
   attribute {
