@@ -3,8 +3,8 @@ import docker
 import os
 import time
 from boto3.dynamodb.conditions import Key
-from enum import Enum
 from datetime import datetime
+from enum import Enum
 
 from .logging_service import LoggingService
 from .slack_service import SlackService
@@ -142,6 +142,7 @@ class NodeService:
                 connected_to_cluster = len(self.docker_client.nodes.list()) > 1
             except Exception as e:
                 connected_to_cluster = False
+
             if self.get_node_type() == NodeType.MANAGER:  # Manager flow
                 if connected_to_cluster:
                     self.log.debug("Already connected to cluster, nothing to do")

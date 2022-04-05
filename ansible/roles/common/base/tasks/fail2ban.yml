@@ -3,7 +3,7 @@
 - name: Enable repo
   shell: amazon-linux-extras install epel -y
 
-- name: install fail2ban
+- name: Install fail2ban
   yum:
     name:
       - fail2ban
