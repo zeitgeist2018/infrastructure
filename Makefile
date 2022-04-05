@@ -2,7 +2,7 @@
 
 ENV=dev
 STATE_PATH?=state/terraform.tfstate
-STATE_BUCKET?=terraform---state
+STATE_BUCKET?=terraform----state
 STATE_PARAMS=-backend-config='bucket=$(STATE_BUCKET)' -backend-config='key=$(STATE_PATH)'
 
 NODE?=0
